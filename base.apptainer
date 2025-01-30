@@ -1,0 +1,42 @@
+Bootstrap: localimage
+From: nv.sif
+
+# This will build a base image from ubuntu - it is much faster
+# to build subsequent images from this if debugging
+#Bootstrap: docker
+#From: ubuntu:18.04
+
+%post
+	apt-get update -y
+	apt-get install curl libssl-dev pkg-config git python3 python3-dev python3-pip libhdf5-mpi-dev -y
+
+	#
+	# build h5py with mpi support
+	# because it does not seem that we can do it from pip (as you can from conda)
+	# https://docs.h5py.org/en/stable/mpi.html#parallel-hdf5
+	#
+	# https://github.com/mpi4py/mpi4py/issues/114
+	# CFLAGS is required for nvidia HPC compilers
+	cd /
+	git clone "https://github.com/h5py/h5py" --depth 1
+	cd /h5py
+	export CC=mpicc
+	export HDF5_MPI="ON"
+	CFLAGS=-noswitcherror pip3 install .
+
+	# https://github.com/mpi4py/mpi4py/issues/114
+	# CFLAGS is required for nvidia HPC compilers
+	CFLAGS=-noswitcherror pip3 install numpy mpi4py --upgrade
+	f2py
+
+	echo "NUMPY VERSION:"
+	pip freeze | grep numpy
+
+	pip3 install torch torchvision torchaudio gymnasium
+	echo "checking pytorch install and GPU availablility"
+	python3 -c "import torch; print(torch.cuda.is_available())"
+
+	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+	export PATH="$PATH":"$HOME/.cargo/bin"
+
+	cargo

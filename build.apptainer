@@ -1,0 +1,104 @@
+Bootstrap: localimage
+From: base.sif
+Stage: build
+
+# before running the build script you must run
+# sh ./prepare-build.sh
+
+# https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nvhpc
+
+%files
+	${STREAMS_DIR} /streams
+
+	${STREAMS_UTILS_DIR}/src/ /streams-utils/src
+	${STREAMS_UTILS_DIR}/Cargo.toml /streams-utils/Cargo.toml
+	${STREAMS_UTILS_DIR}/Cargo.lock /streams-utils/Cargo.lock
+
+%post
+	echo "NUMPY VERSION:"
+	pip freeze | grep numpy
+
+	echo "$HOME"
+
+	# hack to add cargo to path
+	export PATH="$PATH":"$HOME/.cargo/bin"
+
+	# make streams
+	cd /streams/src
+	# replace (in the makefile)
+	# COMPILE = "gnu"
+	# with
+	# COMPILE = "nvfortran"
+	bash -c 'cat Makefile | sed "s/COMPILE = \"gnu\"/COMPILE = \"nvfortran\"/" &> Makefile2'
+	# for some reason singularity does not like us directly piping the output of
+	# ./Makefile to ./Makefile so we have to use this workaround
+	mv Makefile2 Makefile
+	make clean
+	make
+	ls -al
+
+	echo "COMPILED STREAMS FILES!"
+	echo "compiling python extensions"
+
+	# copy the linking flags that we used for STREAMS in the makefile
+	# This is the first occurance of `OLEVEL` in the file,
+	# then use `sed` to remove leading whitespace and `OLEVEL` w/ optimization level
+	#
+	# here \s* denotes any whitespace
+	FLAGS=$(grep "^\s*OLEVEL" Makefile | head -n 1 | sed "s/^\s*OLEVEL\s*=\s*-O3 //g")
+	echo "setting compile flags for F2PY to be $FLAGS"
+
+	# https://forums.developer.nvidia.com/t/compiling-python-wrappers-with-f2py-and-cuda-fortran/157217
+	# FFLAGS is also important here so that we get the correct USE_CUDA declarations in mod_streams.F90
+	LDFLAGS="$FLAGS" FFLAGS="$FLAGS" NPY_DISTUTILS_APPEND_FLAGS=1 make f2py
+	ls -al
+
+	# make streams-utils
+	cd /streams-utils
+	cargo build --release
+
+Bootstrap: localimage
+From: base.sif 
+# use base here so that we have access to python still
+	
+%files from build
+	/streams-utils/target/release/streams-utils /streams-utils
+	/streams/src/streams.exe /streams.exe
+
+	#/cuda-samples/bin/x86_64/linux/release/simpleZeroCopy /simpleZeroCopy
+
+	# python files to run streams
+	/streams/src/libstreams.cpython-38-x86_64-linux-gnu.so /libstreams.cpython-38-x86_64-linux-gnu.so
+
+	# copy python source code into container
+	/streams/streamspy/ /streamspy
+	/streams/pyproject.toml /
+
+%post
+
+	echo "NUMPY VERSION:"
+	pip freeze | grep numpy
+
+	# copy the shared object to site packages so it is globally importable
+	cp /libstreams* /usr/local/lib/python3.8/dist-packages/
+
+	ls /usr/local/lib/python3.8/dist-packages/
+
+	## install streamspy as a package
+	#python3 -m pip install flit
+	#cd /
+	#export FLIT_ROOT_INSTALL=1
+	#pip install .
+	#python3 -c "import streamspy; print(dir(streamspy))"
+
+
+%apprun distribute
+	cd /
+	ls -al
+
+	#echo "executing zero copy to initialize the gpu"
+	#/simpleZeroCopy
+	#echo "finished simple zero copy!"
+
+	# doing the rest of the stuff
+	/streams-utils run-container
