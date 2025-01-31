@@ -3,24 +3,24 @@ database_bl := "$STREAMS_DIR/examples/supersonic_sbli/database_bl.dat"
 nv:
 	mkdir -p $APPTAINER_TMPDIR
 
-	rm -f nv.sif
+	rm -f nv.sandbox
 
-	sudo apptainer build \
-		nv.sif \
-		"docker://nvcr.io/nvidia/nvhpc:22.1-devel-cuda_multi-ubuntu20.04"
+	taskset -c 0-15 sudo apptainer build --sandbox \
+		nv.sandbox \
+		"docker://nvcr.io/nvidia/nvhpc:24.7-devel-cuda_multi-ubuntu22.04"
 
 base:
 	mkdir -p $APPTAINER_TMPDIR
 
-	rm -f base.sif 
+	rm -f base.sandbox 
 	echo $APPTAINER_TMPDIR
-	time sudo -E apptainer build --nv base.sif base.apptainer
-	du -sh base.sif
+	time taskset -c 0-15 sudo -E apptainer build --sandbox --nv base.sandbox base.apptainer
+	sudo du -sh base.sandbox
 
 build:
 	rm -f streams.sif
 	echo $APPTAINER_TMPDIR
-	time sudo -E apptainer build --nv streams.sif build.apptainer
+	time taskset -c 0-15 sudo -E apptainer build --nv streams.sif build.apptainer
 	du -sh streams.sif
 
 # build a config json file as input to the solver

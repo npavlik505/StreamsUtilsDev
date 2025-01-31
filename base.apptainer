@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: nv.sif
+From: nv.sandbox
 
 # This will build a base image from ubuntu - it is much faster
 # to build subsequent images from this if debugging

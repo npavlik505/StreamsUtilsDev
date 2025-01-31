@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: base.sif
+From: base.sandbox
 Stage: build
 
 # before running the build script you must run
@@ -46,11 +46,29 @@ Stage: build
 	#
 	# here \s* denotes any whitespace
 	FLAGS=$(grep "^\s*OLEVEL" Makefile | head -n 1 | sed "s/^\s*OLEVEL\s*=\s*-O3 //g")
-	echo "setting compile flags for F2PY to be $FLAGS"
+	#FLAGS=$(grep "^\s*OLEVEL" Makefile | head -n 1 | sed "s/^\\s*OLEVEL\\s*=\\s*-O3 //g" | sed "s/-ffixed-form//g" | sed "s/-fno-second-underscore//g" | sed "s/-funroll-loops//g" | sed "s/-Mcuda/-cuda -gpu/g")
+        echo "setting compile flags for F2PY to be $FLAGS"
 
 	# https://forums.developer.nvidia.com/t/compiling-python-wrappers-with-f2py-and-cuda-fortran/157217
 	# FFLAGS is also important here so that we get the correct USE_CUDA declarations in mod_streams.F90
-	LDFLAGS="$FLAGS" FFLAGS="$FLAGS" NPY_DISTUTILS_APPEND_FLAGS=1 make f2py
+	LDFLAGS="$FLAGS" FFLAGS="$FLAGS" NPY_DISTUTILS_APPEND_FLAGS=1
+	
+	#F2PY_FCOMPILER=nv f2py -c --fcompiler=nv mod_streams.F90 -m libstreams	
+	F2PY_FCOMPILER=nv f2py -c --fcompiler=nv --f90exec="mpif90" mod_streams.F90 -m libstreams
+
+	#Expliclitly set patht to nvidia’s mpi software
+	# Define the correct MPI installation path
+	export MPI_HOME=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/comm_libs/12.5/hpcx/hpcx-2.19/ompi
+	# Ensure FPATH includes the correct directory for mpi.mod
+	export FPATH=$MPI_HOME/lib:$FPATH
+	# Ensure CPATH includes MPI headers
+	export CPATH=$MPI_HOME/include:$CPATH
+	# Ensure LIBRARY_PATH includes MPI libraries
+	export LIBRARY_PATH=$MPI_HOME/lib:$LIBRARY_PATH
+	# Ensure LD_LIBRARY_PATH includes MPI libraries
+	export LD_LIBRARY_PATH=$MPI_HOME/lib:$LD_LIBRARY_PATH
+
+	make f2py
 	ls -al
 
 	# make streams-utils
@@ -58,7 +76,7 @@ Stage: build
 	cargo build --release
 
 Bootstrap: localimage
-From: base.sif 
+From: base.sandbox 
 # use base here so that we have access to python still
 	
 %files from build
@@ -68,7 +86,7 @@ From: base.sif
 	#/cuda-samples/bin/x86_64/linux/release/simpleZeroCopy /simpleZeroCopy
 
 	# python files to run streams
-	/streams/src/libstreams.cpython-38-x86_64-linux-gnu.so /libstreams.cpython-38-x86_64-linux-gnu.so
+	/streams/src/libstreams.cpython-310-x86_64-linux-gnu.so /libstreams.cpython-310-x86_64-linux
 
 	# copy python source code into container
 	/streams/streamspy/ /streamspy
@@ -80,9 +98,9 @@ From: base.sif
 	pip freeze | grep numpy
 
 	# copy the shared object to site packages so it is globally importable
-	cp /libstreams* /usr/local/lib/python3.8/dist-packages/
+	cp /libstreams* /usr/local/lib/python3.10/dist-packages/
 
-	ls /usr/local/lib/python3.8/dist-packages/
+	ls /usr/local/lib/python3.10/dist-packages/
 
 	## install streamspy as a package
 	#python3 -m pip install flit
