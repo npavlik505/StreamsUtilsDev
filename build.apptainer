@@ -68,7 +68,9 @@ Stage: build
 	# Ensure LD_LIBRARY_PATH includes MPI libraries
 	export LD_LIBRARY_PATH=$MPI_HOME/lib:$LD_LIBRARY_PATH
 
-	make f2py
+	# make f2py
+	F2PY_FCOMPILER=nv f2py -c --fcompiler=nv --f90exec="mpif90" mod_streams.F90 -m libstreams
+	cp ./libstreams*.so /usr/local/lib/python3.10/dist-packages/
 	ls -al
 
 	# make streams-utils
@@ -86,7 +88,7 @@ From: base.sandbox
 	#/cuda-samples/bin/x86_64/linux/release/simpleZeroCopy /simpleZeroCopy
 
 	# python files to run streams
-	/streams/src/libstreams.cpython-310-x86_64-linux-gnu.so /libstreams.cpython-310-x86_64-linux
+	/streams/src/libstreams.cpython-310-x86_64-linux-gnu.so /libstreams.cpython-310-x86_64-linux-gnu.so
 
 	# copy python source code into container
 	/streams/streamspy/ /streamspy
@@ -99,8 +101,10 @@ From: base.sandbox
 
 	# copy the shared object to site packages so it is globally importable
 	cp /libstreams* /usr/local/lib/python3.10/dist-packages/
+	# cp /libstreams* /usr/lib/python3.10/site-packages/
 
 	ls /usr/local/lib/python3.10/dist-packages/
+	# ls /usr/local/lib/python3.10/site-packages/
 
 	## install streamspy as a package
 	#python3 -m pip install flit
@@ -109,6 +113,9 @@ From: base.sandbox
 	#pip install .
 	#python3 -c "import streamspy; print(dir(streamspy))"
 
+%environment
+    # Extend PYTHONPATH so Python can find libstreams in dist-packages
+    export PYTHONPATH="/usr/local/lib/python3.10/dist-packages:$PYTHONPATH"
 
 %apprun distribute
 	cd /
