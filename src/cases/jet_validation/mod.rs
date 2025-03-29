@@ -29,6 +29,8 @@ pub(crate) fn jet_validation(mut args: cli::JetValidation) -> Result<()> {
         z_divisions: 100,
         mpi_x_split: 4,
         steps: args.steps,
+        probe_io_steps: 0,
+        span_average_io_steps: 100,
         blowing_bc: JetActuator::None,
         snapshots_3d: true,
         use_python: true,

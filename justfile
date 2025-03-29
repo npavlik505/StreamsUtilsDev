@@ -20,7 +20,7 @@ base:
 build:
 	rm -f streams.sif
 	echo $APPTAINER_TMPDIR
-	f2py -m libstreams -h ./libstreams.pyf --overwrite-signature ${STREAMS_DIR}/src/min_api.F90
+	f2py -m libstreams -h ./libstreams.pyf --overwrite-signature ${STREAMS_DIR}/src/min_api.F90 ${STREAMS_DIR}/src/mod_streams.F90
 	python3 patch_pyf.py
 	time taskset -c 0-15 sudo -E apptainer build --nv streams.sif build.apptainer
 	du -sh streams.sif
@@ -50,6 +50,7 @@ config:
 		--rly-wr 0.5 \
 		--mpi-x-split 1 \
 		--span-average-io-steps 1 \
+		--probe-io-steps 1 \
 		--python-flowfield-steps 1000 \
 		--use-python \
 		--nymax-wr 99 \

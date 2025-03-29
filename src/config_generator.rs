@@ -142,10 +142,13 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
  dtsave dtsave_restart  enable_plot3d   enable_vtk
   5.       50.                0          {snapshots_3d}
 
-  rand_type
+ rand_type
    -1
 
- sbli_blowing_bc        slot_start_x_global     slot_end_x_global
+ save_probe_steps save_span_average_steps
+    {probe_steps}         {span_average_steps}
+
+sbli_blowing_bc        slot_start_x_global     slot_end_x_global
  {sbli_blowing_bc}              {slot_start}                {slot_end}
    "#,
         flow_type = config.flow_type.as_streams_int(),
@@ -160,6 +163,8 @@ pub(crate) fn _config_generator(config: &Config, output_path: PathBuf) -> anyhow
         angle = config.shock_angle,
         mpi_x_split = config.mpi_x_split,
         steps = config.steps,
+        probe_steps = config.probe_io_steps,
+        span_average_steps = config.span_average_io_steps,
         sbli_blowing_bc = config.blowing_bc.blowing_bc_as_streams_int(),
         snapshots_3d = config.snapshots_3d as usize,
         cfl = cfl,
@@ -231,6 +236,16 @@ pub(crate) struct Config {
 
     /// number of steps for the solver to take
     pub(crate) steps: usize,
+    
+    /// number of steps between writing probe information.
+    /// (0 => never)
+    /// (n >0 => every n steps)
+    pub(crate) probe_io_steps: usize,
+
+    /// number of steps between span average flowfields
+    /// (0 => never)
+    /// (n >0 => every n steps)
+    pub(crate) span_average_io_steps: usize,
 
     /// information on how to setup the blowing boundary condition on the
     /// bottom surface.
