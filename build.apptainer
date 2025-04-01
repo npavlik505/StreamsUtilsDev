@@ -73,8 +73,10 @@ Stage: build
 
 
 	# make streams-utils
+	echo "Fortran compiler: $(which nvfortran)"
+	nvfortran --version
 	cd /streams-utils
-	cargo build --release
+	FC=nvfortran cargo build --release
 
 Bootstrap: localimage
 From: base.sandbox 
