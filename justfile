@@ -20,8 +20,10 @@ base:
 build:
 	rm -f streams.sif
 	echo $APPTAINER_TMPDIR
-	f2py -m libstreams -h ./libstreams.pyf --overwrite-signature ${STREAMS_DIR}/src/min_api.F90 ${STREAMS_DIR}/src/mod_streams.F90
-	python3 patch_pyf.py
+	test -e libstreams*.so && rm libstreams*.so || true
+	# f2py -m libstreamsMin -h ./libstreamsMin.pyf --overwrite-signature ${STREAMS_DIR}/src/min_api.F90
+	# f2py -m libstreamsMod -h ./libstreamsMod.pyf --overwrite-signature ${STREAMS_DIR}/src/mod_api.F90
+	# python3 patch_pyf.py
 	time taskset -c 0-15 sudo -E apptainer build --nv streams.sif build.apptainer
 	du -sh streams.sif
 

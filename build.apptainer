@@ -9,10 +9,12 @@ Stage: build
 
 %files
 	${STREAMS_DIR} /streams
-	${STREAMS_UTILS_DIR}/libstreams.pyf ${STREAMS_DIR}/src/libstreams.pyf
+	# ${STREAMS_UTILS_DIR}/libstreamsMin.pyf ${STREAMS_DIR}/src/libstreamsMin.pyf
+	# ${STREAMS_UTILS_DIR}/libstreamsMod.pyf ${STREAMS_DIR}/src/libstreamsMod.pyf
 	${STREAMS_UTILS_DIR}/src/ /streams-utils/src
 	${STREAMS_UTILS_DIR}/Cargo.toml /streams-utils/Cargo.toml
 	${STREAMS_UTILS_DIR}/Cargo.lock /streams-utils/Cargo.lock
+	${STREAMS_UTILS_DIR}/patch_pyf.py /streams-utils/patch_pyf.py
 
 %post
 	echo "NUMPY VERSION:"
@@ -38,6 +40,12 @@ Stage: build
 	make
 	ls -al
 
+	# Temp - to debug libstreams (fallback path)
+	/bin/echo "🛠️  Copying debug files to /debuglib"
+	mkdir -p /debuglib
+	cp /streams/src/*.F90 /debuglib/ || true
+	cp /streams/src/*.o /debuglib/ || true
+	cp /streams/src/*.mod /debuglib/ || true
 
 	echo "COMPILED STREAMS FILES!"
 	echo "compiling python extensions"
@@ -64,13 +72,20 @@ Stage: build
 	echo "setting compile flags for F2PY to be $FLAGS"
 
 	# Set flags for f2py in a one-liner call to make f2py
-	LDFLAGS="$FLAGS" FFLAGS="$FLAGS" NPY_DISTUTILS_APPEND_FLAGS=1 make f2py
-	ls -al # libstreams*.so || { echo "libstreams.so missing!"; exit 1; }
-	
+	LDFLAGS="$FLAGS" FFLAGS="$FLAGS" NPY_DISTUTILS_APPEND_FLAGS=1 make build-f2py
+	ls -al libstreamsMin*.so || { echo "libstreamsMin.so missing!"; exit 1; }
+	ls -al libstreamsMod*.so || { echo "libstreamsMod.so missing!"; exit 1; }
+
+	# Copy libstreams and verify contents, import, and location
 	cd /streams/src
-	cp libstreams*.so /usr/local/lib/python3.10/dist-packages/
-
-
+	cp libstreamsMin*.so /usr/local/lib/python3.10/dist-packages/
+	cp libstreamsMod*.so /usr/local/lib/python3.10/dist-packages/
+	echo "📦 Listing built shared objects:"
+	python3 -c "import sys; print('Python sys.path:', sys.path)"
+	python3 -c "import libstreamsMin; print('✅ libstreamsMin imported successfully')"
+	python3 -c "import libstreamsMod; print('✅ libstreamsMod imported successfully')"
+	find . -name "libstreamsMin*.so" -exec ls -l {} \;
+	find . -name "libstreamsMod*.so" -exec ls -l {} \;
 
 	# make streams-utils
 	echo "Fortran compiler: $(which nvfortran)"
@@ -87,11 +102,15 @@ From: base.sandbox
 	/streams/src/streams.exe /streams.exe
 
 	# python files to run streams
-	/streams/src/libstreams.cpython-310-x86_64-linux-gnu.so /libstreams.cpython-310-x86_64-linux-gnu.so
+	/streams/src/libstreamsMin*.so /libstreamsMin.so
+	/streams/src/libstreamsMod*.so /libstreamsMod.so
 
 	# copy python source code into container
 	/streams/streamspy/ /streamspy
 	/streams/pyproject.toml /
+
+	# Debug files
+	/debuglib /debuglib
 
 %post
 
@@ -99,7 +118,8 @@ From: base.sandbox
 	pip freeze | grep numpy
 
 	# copy the shared object to site packages so it is globally importable
-	cp /libstreams* /usr/local/lib/python3.10/dist-packages/
+	cp /libstreamsMin* /usr/local/lib/python3.10/dist-packages/
+        cp /libstreamsMod* /usr/local/lib/python3.10/dist-packages/
 
 	ls /usr/local/lib/python3.10/dist-packages/
 
