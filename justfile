@@ -42,25 +42,26 @@ config:
 		{{streams_flow_type}} \
 		--steps 10 \
 		--reynolds-number 250 \
-		--mach-number 0. \
-		--x-divisions 300 \
-		--y-divisions 300 \
+		--mach-number 2.28 \
+		--x-divisions 600 \
+		--y-divisions 208 \
 		--z-divisions 100 \
 		--json \
-		--x-length 3.0 \
-		--y-length 3.0 \
-		--rly-wr 0.5 \
+		--x-length 27.0 \
+		--y-length 6.0 \
+		--z-length 3.8 \
+		--rly-wr 2.5 \
 		--mpi-x-split 1 \
 		--span-average-io-steps 1 \
 		--probe-io-steps 1 \
 		--python-flowfield-steps 1000 \
 		--use-python \
-		--nymax-wr 99 \
+		--nymax-wr 201 \
 		--sensor-threshold 0.1 \
 		constant \
 			--amplitude 1.0 \
 			--slot-start 100 \
-			--slot-end 200
+			--slot-end 120
 
 	cat {{config_output}}
 
