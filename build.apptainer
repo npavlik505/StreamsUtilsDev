@@ -72,20 +72,22 @@ Stage: build
 	echo "setting compile flags for F2PY to be $FLAGS"
 
 	# Set flags for f2py in a one-liner call to make f2py
-	LDFLAGS="$FLAGS" FFLAGS="$FLAGS" NPY_DISTUTILS_APPEND_FLAGS=1 make build-f2py
-	ls -al libstreamsMin*.so || { echo "libstreamsMin.so missing!"; exit 1; }
-	ls -al libstreamsMod*.so || { echo "libstreamsMod.so missing!"; exit 1; }
+	cd /streams/src
+	pwd
+	LDFLAGS="$FLAGS" FFLAGS="$FLAGS" NPY_DISTUTILS_APPEND_FLAGS=1 make f2py
+	ls -al libstreams*.so || { echo "libstreams.so missing!"; exit 1; }
+
+	echo "🔎 nm on libstreams:"
+	nm -D libstreams*.so | grep mod_streams || echo "mod_streams not linked"
+
 
 	# Copy libstreams and verify contents, import, and location
 	cd /streams/src
-	cp libstreamsMin*.so /usr/local/lib/python3.10/dist-packages/
-	cp libstreamsMod*.so /usr/local/lib/python3.10/dist-packages/
+	cp libstreams*.so /usr/local/lib/python3.10/dist-packages/
 	echo "📦 Listing built shared objects:"
 	python3 -c "import sys; print('Python sys.path:', sys.path)"
-	python3 -c "import libstreamsMin; print('✅ libstreamsMin imported successfully')"
-	python3 -c "import libstreamsMod; print('✅ libstreamsMod imported successfully')"
-	find . -name "libstreamsMin*.so" -exec ls -l {} \;
-	find . -name "libstreamsMod*.so" -exec ls -l {} \;
+	python3 -c "import libstreams; print('✅ libstreams imported successfully')"
+	find . -name "libstreams*.so" -exec ls -l {} \;
 
 	# make streams-utils
 	echo "Fortran compiler: $(which nvfortran)"
@@ -102,8 +104,7 @@ From: base.sandbox
 	/streams/src/streams.exe /streams.exe
 
 	# python files to run streams
-	/streams/src/libstreamsMin*.so /libstreamsMin.so
-	/streams/src/libstreamsMod*.so /libstreamsMod.so
+	/streams/src/libstreams*.so /libstreams.so
 
 	# copy python source code into container
 	/streams/streamspy/ /streamspy
@@ -118,8 +119,10 @@ From: base.sandbox
 	pip freeze | grep numpy
 
 	# copy the shared object to site packages so it is globally importable
-	cp /libstreamsMin* /usr/local/lib/python3.10/dist-packages/
-        cp /libstreamsMod* /usr/local/lib/python3.10/dist-packages/
+	cp /libstreams* /usr/local/lib/python3.10/dist-packages/
+
+        # ✅ make libstreams.so available for runtime linking
+        cp /libstreams.so /usr/lib/
 
 	ls /usr/local/lib/python3.10/dist-packages/
 

@@ -8,6 +8,7 @@ nv:
 	taskset -c 0-15 sudo apptainer build --sandbox \
 		nv.sandbox \
 		"docker://nvcr.io/nvidia/nvhpc:24.7-devel-cuda_multi-ubuntu22.04"
+# "docker://nvcr.io/nvidia/nvhpc:25.3-devel-cuda_multi-ubuntu22.04"
 
 base:
 	mkdir -p $APPTAINER_TMPDIR
