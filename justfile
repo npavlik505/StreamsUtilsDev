@@ -41,7 +41,7 @@ config:
 
 	cargo r -- config-generator {{config_output}} \
 		{{streams_flow_type}} \
-		--steps 10 \
+		--steps 26 \
 		--reynolds-number 250 \
 		--mach-number 2.28 \
 		--x-divisions 600 \
@@ -53,16 +53,16 @@ config:
 		--z-length 3.8 \
 		--rly-wr 2.5 \
 		--mpi-x-split 1 \
-		--span-average-io-steps 1 \
-		--probe-io-steps 1 \
-		--python-flowfield-steps 1000 \
+		--span-average-io-steps 5 \
+		--probe-io-steps 0 \
+		--python-flowfield-steps 10 \
 		--use-python \
 		--nymax-wr 201 \
 		--sensor-threshold 0.1 \
-		constant \
+		DMDc \
 			--amplitude 1.0 \
 			--slot-start 100 \
-			--slot-end 120
+			--slot-end 149
 
 	cat {{config_output}}
 

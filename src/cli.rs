@@ -338,6 +338,22 @@ pub(crate) enum JetActuator {
         #[clap(long)]
         slot_end: usize,
     },
+    #[clap(name = "DMDc")]
+    DMDc {
+        #[clap(long)]
+        /// amplitude of the parabolic jet velocity
+        amplitude: f64,
+        #[clap(long)]
+        /// the x location (index) at which the slot starts blowing
+        ///
+        /// required if slot-end or sbli-blowing-bc is set
+        slot_start: usize,
+        /// the x location (index) at which the slot stop blowing
+        ///
+        /// required if slot-start or sbli-blowing-bc is set
+        #[clap(long)]
+        slot_end: usize,
+    },
     /// use RL controller for the jet amplitude
     Adaptive {
         #[clap(long)]
@@ -365,6 +381,7 @@ impl JetActuator {
             Self::None => -1,
             Self::Constant { slot_start, .. } => *slot_start as i32,
             Self::Sinusoidal { slot_start, .. } => *slot_start as i32,
+            Self::DMDc { slot_start, .. } => *slot_start as i32,
             Self::Adaptive { slot_start, .. } => *slot_start as i32,
         }
     }
@@ -374,6 +391,7 @@ impl JetActuator {
             Self::None => -1,
             Self::Constant { slot_end, .. } => *slot_end as i32,
             Self::Sinusoidal { slot_end, .. } => *slot_end as i32,
+            Self::DMDc { slot_end, .. } => *slot_end as i32,
             Self::Adaptive { slot_end, .. } => *slot_end as i32,
         }
     }

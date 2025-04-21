@@ -72,6 +72,14 @@ pub(crate) fn ai_institute(mut args: cli::JetValidation) -> Result<()> {
                 angular_frequency,
             },
         ),
+        (
+            "dmdc",
+            cli::JetActuator::DMDc {
+                amplitude: 1. * amplitude,
+                slot_start,
+                slot_end,
+            },
+        ),
     ];
 
     let mut jobs = Vec::new();
