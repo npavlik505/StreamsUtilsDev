@@ -8,7 +8,6 @@ nv:
 	taskset -c 0-15 sudo apptainer build --sandbox \
 		nv.sandbox \
 		"docker://nvcr.io/nvidia/nvhpc:24.7-devel-cuda_multi-ubuntu22.04"
-# "docker://nvcr.io/nvidia/nvhpc:25.3-devel-cuda_multi-ubuntu22.04"
 
 base:
 	mkdir -p $APPTAINER_TMPDIR
@@ -27,6 +26,8 @@ build:
 	# python3 patch_pyf.py
 	time taskset -c 0-15 sudo -E apptainer build --nv streams.sif build.apptainer
 	du -sh streams.sif
+
+
 
 # build a config json file as input to the solver
 config_output := "./output/input.json"
@@ -66,61 +67,7 @@ config:
 
 	cat {{config_output}}
 
-jet_validation_base_path := "./distribute/jet_validation/"
 
-jet_validation_number := "20"
-jet_validation_batch_name := "jet_validation_" + jet_validation_number
-jet_valiation_output_folder := jet_validation_base_path + jet_validation_batch_name
-
-jet_validation:
-	echo {{jet_valiation_output_folder}}
-
-	# 600, 208, 100
-	#--steps 10000 \
-
-	cargo r -- cases jet-validation \
-		{{jet_valiation_output_folder}} \
-		--batch-name {{jet_validation_batch_name}} \
-		--solver-sif ./streams.sif \
-		--steps 50000 \
-		--database-bl {{database_bl}} \
-		--matrix @karlik:matrix.org
-
-variable_dt_base_path := "./distribute/variable_dt/"
-
-variable_dt_case_number := "01"
-variable_dt_batch_name := "variable_dt_" + variable_dt_case_number
-variable_dt_output_folder := variable_dt_base_path + variable_dt_batch_name
-
-variable_dt:
-	echo {{jet_valiation_output_folder}}
-
-	# 600, 208, 100
-	#--steps 10000 \
-
-	cargo r -- cases variable-dt \
-		{{variable_dt_output_folder}} \
-		--batch-name {{variable_dt_batch_name}} \
-		--solver-sif ./streams.sif \
-		--steps 20000 \
-		--database-bl {{database_bl}} \
-		--matrix @karlik:matrix.org
-
-ai_institute_base_path := "./distribute/ai_institute/"
-ai_institute_case_number := "01"
-ai_institute_batch_name := "ai_institute_" + ai_institute_case_number
-ai_institute_output_folder := ai_institute_base_path + ai_institute_batch_name
-
-ai_institute:
-	echo {{ai_institute_output_folder}}
-
-	cargo r -- cases ai-institute \
-		{{ai_institute_output_folder}} \
-		--batch-name {{ai_institute_batch_name}} \
-		--solver-sif ./streams.sif \
-		--steps 50000 \
-		--database-bl {{database_bl}} \
-		--matrix @karlik:matrix.org
 
 run:
 	cargo r -- run-local \
@@ -144,14 +91,3 @@ local:
 
 vtk:
 	cargo r --release -- hdf5-to-vtk ./output/distribute_save
-
-base_animate_folder := "./distribute/ai_institute/ai_institute_01/ai_institute_01/"
-
-animate:
-	cargo r --release -- animate \
-		"{{base_animate_folder}}/no_actuator" \
-		--decimate 5
-
-	#cargo r --release -- animate \
-	#	"{{base_animate_folder}}/sinusoidal" \
-	#	--decimate 5

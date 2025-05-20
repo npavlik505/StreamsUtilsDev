@@ -1,6 +1,5 @@
 mod animate;
 mod binary_to_vtk;
-mod cases;
 mod cli;
 mod config_generator;
 mod hdf5_to_vtk;
@@ -22,7 +21,6 @@ fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     match args.mode {
-        Command::Cases(x) => cases::cases(x)?,
         Command::ConfigGenerator(x) => config_generator::config_generator(x)?,
         Command::RunContainer(x) => run::run_container(x)?,
         Command::RunLocal(x) => run::run_local(x)?,
@@ -42,8 +40,6 @@ enum Error {
     File(FileError),
     #[error("{0}")]
     Config(config_generator::ConfigError),
-    #[error("{0}")]
-    Sbli(cases::SbliError),
     #[error("{0}")]
     SerializationYaml(distribute::serde_yaml::Error),
     #[error("{0}")]

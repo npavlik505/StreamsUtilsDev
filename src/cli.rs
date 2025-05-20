@@ -14,9 +14,6 @@ pub(crate) struct Args {
 
 #[derive(Subcommand, Debug, Clone)]
 pub(crate) enum Command {
-    /// generate distribute compute cases
-    #[command(subcommand)]
-    Cases(Cases),
     /// generate a config file (input.dat) for use in the solver
     ConfigGenerator(ConfigGenerator),
     /// run the solver once inside the apptainer container
@@ -399,14 +396,6 @@ impl JetActuator {
 
 #[derive(Debug, Clone, Parser)]
 pub(crate) struct BlowingSlot {}
-
-#[derive(Subcommand, Debug, Clone)]
-pub(crate) enum Cases {
-    Sbli(SbliCases),
-    JetValidation(JetValidation),
-    VariableDt(JetValidation),
-    AiInstitute(JetValidation),
-}
 
 #[derive(Parser, Debug, Clone)]
 pub(crate) struct SbliCases {

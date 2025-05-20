@@ -1,7 +1,0 @@
-{"output_path":"/home/brooks/distribute-cases/streams_sweep_0/reynolds_number_0.json","reynolds_number":200.0,"mach_number":2.28,"shock_angle":8.0,"x_length":27.0,"x_divisions":840,"y_length":6.0,"y_divisions":208,"z_length":3.8,"z_divisions":150,"mpi_x_split":4,"dry":false,"steps":100,"probe_io_steps":0,"span_average_io_steps":10, "sbli_blowing_bc": 0, "snapshots_3d":false,
-"flow_type": "ShockBoundaryLayer", "blowing_bc": "None", "use_python": true, "nymax_wr": 201, "rly_wr": 2.5, 
-"probe_locations_x": [],
-"probe_locations_z": [],
-"sensor_threshold": 0.1,
-"shock_impingement": 15.0
-}
