@@ -353,15 +353,29 @@ pub(crate) enum JetActuator {
     },
     /// use RL controller for the jet amplitude
     Adaptive {
+        #[clap(long, default_value_t = 1)] amplitude: f64,
         #[clap(long)]
         /// the x location (index) at which the slot starts blowing
         ///
         /// required if slot-end or sbli-blowing-bc is set
         slot_start: usize,
+        #[clap(long)]
         /// the x location (index) at which the slot stop blowing
         ///
         /// required if slot-start or sbli-blowing-bc is set
         slot_end: usize,
+        // RL hyper-parameters --------------------------
+        #[clap(long, default_value_t = 10)]   train_episodes:     usize,
+        #[clap(long, default_value_t = 10)]   eval_episodes:     usize,
+        #[clap(long, default_value_t = 1000)] eval_max_steps:    usize,
+        #[clap(long, default_value_t = 1000)] checkpoint_dir:    String,
+        #[clap(long, default_value_t = 5)]    checkpoint_interval: usize,
+        #[clap(long, default_value_t = 42)]   seed:              u64,
+        #[clap(long, default_value_t = 3e-4)] learning_rate:     f64,
+        #[clap(long, default_value_t = 0.99)] gamma:             f64,
+        #[clap(long, default_value_t = 0.005)] tau:              f64,
+        #[clap(long, default_value_t = 1_000_000)] buffer_size:  usize,
+        #[clap(long, default_value_t = 1)] eval_output:  String,
     },
 }
 

@@ -1,5 +1,6 @@
 database_bl := "$STREAMS_DIR/examples/supersonic_sbli/database_bl.dat"
 
+
 nv:
 	mkdir -p $APPTAINER_TMPDIR
 
@@ -33,6 +34,8 @@ build:
 config_output := "./output/input.json"
 #streams_flow_type := "shock-boundary-layer"
 streams_flow_type := "boundary-layer"
+eval := "./output/eval"
+checkpoint := "./output/checkpoint"
 
 config:
 	echo {{config_output}}
@@ -60,10 +63,21 @@ config:
 		--use-python \
 		--nymax-wr 201 \
 		--sensor-threshold 0.1 \
-		DMDc \
+		adaptive \
 			--amplitude 1.0 \
 			--slot-start 100 \
-			--slot-end 149
+			--slot-end 149 \
+			--train-episodes 10 \
+			--eval-episodes 10 \
+			--eval-max-steps 1000 \
+			--checkpoint-dir {{checkpoint}}\
+			--checkpoint-interval 5 \
+			--seed 42 \
+			--learning-rate 0.0003 \
+			--gamma 0.99 \
+			--tau 0.005 \
+			--buffer-size 100000 \
+			--eval-output {{eval}} \
 
 	cat {{config_output}}
 
