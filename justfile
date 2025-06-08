@@ -70,7 +70,7 @@ config:
 			--train-episodes 10 \
 			--eval-episodes 10 \
 			--eval-max-steps 1000 \
-			--checkpoint-dir {{checkpoint}}\
+			--checkpoint-dir {{checkpoint}} \
 			--checkpoint-interval 5 \
 			--seed 42 \
 			--learning-rate 0.0003 \
