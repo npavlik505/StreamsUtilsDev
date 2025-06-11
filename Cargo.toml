@@ -19,6 +19,7 @@ anyhow = "1.0.65"
 xshell = "0.2.2"
 hdf5 = "0.8.1"
 hdf5-sys = { version = "0.8.1", features = ["static"] }
+# hdf5-sys = { version = "0.8.1", features = ["mpi"] }
 itertools = "0.10.5"
 
 [dependencies.vtk]

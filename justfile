@@ -45,7 +45,7 @@ config:
 
 	cargo r -- config-generator {{config_output}} \
 		{{streams_flow_type}} \
-		--steps 2500 \
+		--steps 6 \
 		--reynolds-number 250 \
 		--mach-number 2.28 \
 		--x-divisions 600 \
@@ -57,7 +57,7 @@ config:
 		--z-length 3.8 \
 		--rly-wr 2.5 \
 		--mpi-x-split 4 \
-		--span-average-io-steps 5 \
+		--span-average-io-steps 2 \
 		--probe-io-steps 0 \
 		--python-flowfield-steps 500 \
 		--use-python \
@@ -67,9 +67,9 @@ config:
 			--amplitude 1.0 \
 			--slot-start 100 \
 			--slot-end 149 \
-			--train-episodes 10 \
-			--eval-episodes 10 \
-			--eval-max-steps 1000 \
+			--train-episodes 2 \
+			--eval-episodes 1 \
+			--eval-max-steps 6 \
 			--checkpoint-dir {{checkpoint}} \
 			--checkpoint-interval 5 \
 			--seed 42 \
@@ -78,6 +78,7 @@ config:
 			--tau 0.005 \
 			--buffer-size 100000 \
 			--eval-output {{eval}} \
+			
 
 	cat {{config_output}}
 
