@@ -368,15 +368,16 @@ pub(crate) enum JetActuator {
         #[clap(long, default_value_t = 10)]   train_episodes:     usize,
         #[clap(long, default_value_t = 10)]   eval_episodes:     usize,
         #[clap(long, default_value_t = 1000)] eval_max_steps:    usize,
-        #[clap(long, default_value = "/output/checkpoint")] checkpoint_dir:    String,
+        #[clap(long, default_value = "/RL_metrics/checkpoint")] checkpoint_dir:    String,
         #[clap(long, default_value_t = 5)]    checkpoint_interval: usize,
         #[clap(long, default_value_t = 42)]   seed:              u64,
         #[clap(long, default_value_t = 3e-4)] learning_rate:     f64,
         #[clap(long, default_value_t = 0.99)] gamma:             f64,
         #[clap(long, default_value_t = 0.005)] tau:              f64,
         #[clap(long, default_value_t = 1_000_000)] buffer_size:  usize,
-        #[clap(long, default_value = "/output/eval")] eval_output:  String,
+        #[clap(long, default_value = "/RL_metrics/eval")] eval_output:  String,
         #[clap(long, default_value = "false")] verbose:  bool,
+        #[clap(long, default_value = "/RL_metrics/training")] training_output: String,
     },
 }
 

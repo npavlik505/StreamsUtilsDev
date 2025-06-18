@@ -34,8 +34,9 @@ build:
 config_output := "./output/input.json"
 #streams_flow_type := "shock-boundary-layer"
 streams_flow_type := "boundary-layer"
-eval := "./output/eval"
-checkpoint := "./output/checkpoint"
+eval := "./RL_metrics/evaluation"
+training := "./RL_metrics/training"
+checkpoint := "./RL_metrics/checkpoint"
 
 config:
 	echo {{config_output}}
@@ -68,7 +69,7 @@ config:
 			--slot-start 100 \
 			--slot-end 149 \
 			--train-episodes 2 \
-			--eval-episodes 1 \
+			--eval-episodes 2 \
 			--eval-max-steps 6 \
 			--checkpoint-dir {{checkpoint}} \
 			--checkpoint-interval 5 \
@@ -78,7 +79,7 @@ config:
 			--tau 0.005 \
 			--buffer-size 100000 \
 			--eval-output {{eval}} \
-			
+			--training-output {{training}} \
 
 	cat {{config_output}}
 
